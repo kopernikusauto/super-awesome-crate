@@ -27,6 +27,20 @@ steps:
     displayName: Cargo test
   - script: cargo clippy --all
     displayName: Cargo clippy
+  - task: CopyFiles@2
+    displayName: Copy assets
+    inputs:
+      sourceFolder: '$(Build.SourcesDirectory)/target/release/'
+      contents: |
+        libsuper_awesome_crate.a
+      targetFolder: '$(Build.BinariesDirectory)'
+  - task: ArchiveFiles@2
+    displayName: Gather assets
+    inputs:
+      rootFolderOrFile: '$(Build.BinariesDirectory)'
+      archiveType: 'tar'
+      tarCompression: 'gz'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName).tar.gz'
   - task: GitHubRelease@0
     displayName: 'GitHub release'
     inputs:
@@ -35,7 +49,7 @@ steps:
       action: 'create'
       target: '$(build.sourceVersion)'
       tagPattern: 'v*.*.*'
-      assets: '$(Build.ArtifactStagingDirectory)/target/release/libsuper_awesome_crate.a'
+      assets: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName).tar.gz'
       title: '$(Build.SourceBranchName)'
       assetUploadMode: 'replace'
       addChangeLog: true
