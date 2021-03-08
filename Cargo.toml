@@ -1,0 +1,11 @@
+[package]
+name = "super-awesome-crate"
+version = "0.1.0"
+authors = ["Ignat Georgiev <ignat.m.georgiev@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+num-traits = "0.2"
+approx = "0.4.0"
