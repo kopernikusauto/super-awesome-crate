@@ -1,11 +1,12 @@
 strategy:
   matrix:
-    windows:
-      image_name: windows-2019
+#    windows:
+#      image_name: windows-2019
     linux:
       image_name: ubuntu-20.04
 
-# trigger on every commit in main
+# trigger on every commit in main and every stages:
+# the tag is necessary otherwise it doesn't trigger on any tag
 trigger:
   branches:
     include: ['master']
@@ -20,7 +21,7 @@ pool:
   vmImage: $(image_name)
 
 steps:
-  - script: cargo build --all
+  - script: cargo build --release --all
     displayName: Cargo build
   - script: cargo test --all
     displayName: Cargo test
@@ -34,7 +35,7 @@ steps:
       action: 'create'
       target: '$(build.sourceVersion)'
       tagPattern: 'v*.*.*'
-      assets: '$(Build.ArtifactStagingDirectory)/*'
+      assets: '$(Build.ArtifactStagingDirectory)/target/release/libsuper_awesome_crate.a'
       title: '$(Build.SourceBranchName)'
       assetUploadMode: 'replace'
       addChangeLog: true
