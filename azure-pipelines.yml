@@ -26,7 +26,7 @@ steps:
     displayName: Cargo test
   - script: cargo clippy --all
     displayName: Cargo clippy
-  - task: GitHubRelease
+  - task: GitHubRelease@0
     displayName: 'GitHub release '
     inputs:
       gitHubConnection: 'imgeorgiev'
