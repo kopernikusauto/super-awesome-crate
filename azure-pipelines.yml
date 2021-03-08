@@ -5,9 +5,13 @@ strategy:
     linux:
       image_name: ubuntu-20.04
 
-# trigger on every commit in main
+# trigger on every commit in main with any stages:
+# the any tag is needed otherwise Azure doesn't run when tags are present
 trigger:
-  - main
+  branches:
+    include: ['main']
+  tags:
+    include: ['*']
 
 # trigger on every pull request to main
 pr:
