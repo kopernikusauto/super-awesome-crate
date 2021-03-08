@@ -27,7 +27,7 @@ steps:
   - script: cargo clippy --all
     displayName: Cargo clippy
   - task: GitHubRelease@0
-    displayName: 'GitHub release '
+    displayName: 'GitHub release'
     inputs:
       gitHubConnection: 'imgeorgiev'
       repositoryName: '$(Build.Repository.Name)'
@@ -35,6 +35,6 @@ steps:
       target: '$(build.sourceVersion)'
       tagPattern: 'v*.*.*'
       assets: '$(Build.ArtifactStagingDirectory)/*'
-      title: '$(build.my_tag) - $(build.date)'
+      title: '$(Build.SourceBranchName)'
       assetUploadMode: 'replace'
       addChangeLog: true
