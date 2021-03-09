@@ -40,7 +40,7 @@ steps:
       rootFolderOrFile: '$(Build.BinariesDirectory)'
       archiveType: 'tar'
       tarCompression: 'gz'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName).tar.gz'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-$(Agent.OS)-$(Agent.OSArchitecture).tar.gz'
   - task: GitHubRelease@0
     displayName: 'GitHub release'
     inputs:
