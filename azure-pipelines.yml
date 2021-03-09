@@ -21,18 +21,23 @@ pool:
   vmImage: $(image_name)
 
 steps:
+  - script: cargo build --all
+    displayName: Cargo build release
   - script: cargo build --release --all
-    displayName: Cargo build
+    displayName: Cargo build release
   - script: cargo test --all
     displayName: Cargo test
   - script: cargo clippy --all
     displayName: Cargo clippy
   - task: CopyFiles@2
-    displayName: Copy assets
+    displayName: Copy builds
     inputs:
-      sourceFolder: '$(Build.SourcesDirectory)/target/release/'
+      sourceFolder: '$(Build.SourcesDirectory)/target/'
       contents: |
-        libsuper_awesome_crate.a
+        debug/libsuper_awesome_crate.a 
+        release/libsuper_awesome_crate.a 
+        debug/super_awesome_crate.lib 
+        release/super_awesome_crate.lib
       targetFolder: '$(Build.BinariesDirectory)'
   - task: ArchiveFiles@2
     displayName: Gather assets
