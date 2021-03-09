@@ -1,17 +1,20 @@
+# trigger on every commit in main with the correct tag pattern
+trigger:
+  branches:
+    include: ['master']
+  tags:
+    include: ['*']
+
+pr:
+  - master
+
 jobs:
 ################################################
-- job: 'Build & Test'
+- job: 'Build'
 
   # base containter definition
   pool:
     vmImage: ubuntu-20.04
-
-  # trigger on every commit to master and every pull request
-  trigger:
-    - master
-
-  pr:
-    - master
 
   steps:
   - script: |
@@ -27,16 +30,12 @@ jobs:
 ################################################
 - job: 'Realease'
 
+  # run only if the commit was tagged
+  condition: startsWith(variables['build.sourceBranch'], 'refs/tags/')
+
   # base containter definition
   pool:
     vmImage: ubuntu-20.04
-
-  # trigger on every commit in main with the correct tag pattern
-  trigger:
-    branches:
-      include: ['master']
-    tags:
-      include: ['v*.*.*']
 
   steps:
   # build for all other supported platforms only if we're releasing
