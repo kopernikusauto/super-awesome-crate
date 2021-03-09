@@ -21,22 +21,27 @@ pool:
   vmImage: $(image_name)
 
 steps:
-  - script: cargo build --all --target=x86_64-unknown-linux-gnu
-    displayName: Cargo build release
-  - script: cargo build --release --all --target=x86_64-unknown-linux-gnu
-    displayName: Cargo build release
+  - script: |
+      cargo build --all --target=x86_64-unknown-linux-gnu
+      cargo build --all --target=x86_64-unknown-linux-gnu --release
+    displayName: Cargo build
   - script: cargo test --all
     displayName: Cargo test
   - script: cargo clippy --all
     displayName: Cargo clippy
   - script: |
+      rustup target add x86_64-pc-windows-msvc
+      cargo build --target=x86_64-pc-windows-msvc
+      cargo build --target=x86_64-pc-windows-msvc --release
+    displayName: Cargo x86_64-pc-windows-msvc build
+  - script: |
       rustup target add aarch64-unknown-linux-gnu
       cargo build --target=aarch64-unknown-linux-gnu --release
     displayName: Cargo aarch64-unknown-linux-gnu build
-  - script: |
-      rustup target add aarch64-unknown-none
-      cargo build --target=aarch64-unknown-none --release
-    displayName: Cargo aarch64-unknown-none build
+  # - script: |
+  #     rustup target add aarch64-unknown-none
+  #     cargo build --target=aarch64-unknown-none --release
+  #   displayName: Cargo aarch64-unknown-none build
   - task: CopyFiles@2
     displayName: Copy builds
     inputs:
@@ -44,25 +49,24 @@ steps:
       contents: |
         x86_64-unknown-linux-gnu/debug/libsuper_awesome_crate.a 
         x86_64-unknown-linux-gnu/release/libsuper_awesome_crate.a 
-        debug/super_awesome_crate.lib 
-        release/super_awesome_crate.lib
+        x86_64-pc-windows-msvc/debug/super_awesome_crate.lib 
+        x86_64-pc-windows-msvc/release/super_awesome_crate.lib
         aarch64-unknown-linux-gnu/release/libsuper_awesome_crate.a
         aarch64-unknown-none/release/libsuper_awesome_crate.a
       targetFolder: '$(Build.BinariesDirectory)'
   - task: ArchiveFiles@2
     displayName: x86_64-unknown-linux-gnu build archive
     inputs:
-      rootFolderOrFile: '$(Build.BinariesDirectory)'
+      rootFolderOrFile: '$(Build.BinariesDirectory)/x86_64-unknown-linux-gnu'
       archiveType: 'tar'
       tarCompression: 'gz'
       archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-linux-amd64.tar.gz'
   - task: ArchiveFiles@2
-    displayName: aarch64-unknown-none build archive
+    displayName: x86_64-pc-windows-msvc build archive
     inputs:
-      rootFolderOrFile: '$(Build.BinariesDirectory)/aarch64-unknown-none/release'
-      archiveType: 'tar'
-      tarCompression: 'gz'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-aarch64.tar.gz'
+      rootFolderOrFile: '$(Build.BinariesDirectory)/x86_64-pc-windows-msvc'
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-windows-amd64.zip'
   - task: ArchiveFiles@2
     displayName: aarch64-unknown-linux-gnu build archive
     inputs:
@@ -70,6 +74,13 @@ steps:
       archiveType: 'tar'
       tarCompression: 'gz'
       archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-linux-aarch64.tar.gz'
+  # - task: ArchiveFiles@2
+  #   displayName: aarch64-unknown-none build archive
+  #   inputs:
+  #     rootFolderOrFile: '$(Build.BinariesDirectory)/aarch64-unknown-none/release'
+  #     archiveType: 'tar'
+  #     tarCompression: 'gz'
+  #     archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-aarch64.tar.gz'
   - task: GitHubRelease@0
     displayName: 'GitHub release'
     inputs:
