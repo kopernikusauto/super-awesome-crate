@@ -1,7 +1,7 @@
 strategy:
   matrix:
-#    windows:
-#      image_name: windows-2019
+   windows:
+     image_name: windows-2019
     linux:
       image_name: ubuntu-20.04
 
@@ -49,7 +49,7 @@ steps:
       action: 'create'
       target: '$(build.sourceVersion)'
       tagPattern: 'v*.*.*'
-      assets: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName).tar.gz'
+      assets: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-$(Agent.OS)-$(Agent.OSArchitecture).tar.gz'
       title: '$(Build.SourceBranchName)'
       assetUploadMode: 'replace'
       addChangeLog: true
