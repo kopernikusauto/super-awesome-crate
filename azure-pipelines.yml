@@ -1,7 +1,7 @@
 strategy:
   matrix:
     windows:
-  image_name: windows-2019
+      image_name: windows-2019
     linux:
       image_name: ubuntu-20.04
 
