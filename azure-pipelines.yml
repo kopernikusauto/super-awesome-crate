@@ -1,118 +1,120 @@
 jobs:
-  - job: 'Build & Test'
+################################################
+- job: 'Build & Test'
 
-    # base containter definition
-    pool:
-      vmImage: ubuntu-20.04
+  # base containter definition
+  pool:
+    vmImage: ubuntu-20.04
 
-    # trigger on every commit to master and every pull request
-    trigger:
-      - master
+  # trigger on every commit to master and every pull request
+  trigger:
+    - master
 
-    pr:
-      - master
+  pr:
+    - master
 
+  steps:
+  - script: |
+      cargo build --all
+    displayName: Cargo build
 
-    steps:
-      - script: |
-          cargo build --all
-        displayName: Cargo build
+  - script: cargo test --all
+    displayName: Cargo test
 
-      - script: cargo test --all
-        displayName: Cargo test
+  - script: cargo clippy --all
+    displayName: Cargo clippy
 
-      - script: cargo clippy --all
-        displayName: Cargo clippy
+################################################
+- job: 'Realease'
 
-  - job: 'Realease'
-    # base containter definition
-    pool:
-      vmImage: ubuntu-20.04
+  # base containter definition
+  pool:
+    vmImage: ubuntu-20.04
 
-    # trigger on every commit in main with the correct tag pattern
-    trigger:
-      branches:
-        include: ['master']
-      tags:
-        include: ['v*.*.*']
+  # trigger on every commit in main with the correct tag pattern
+  trigger:
+    branches:
+      include: ['master']
+    tags:
+      include: ['v*.*.*']
 
-    steps:
-      # build for all other supported platforms only if we're releasing
-      - script: |
-          cargo build --all --target=x86_64-unknown-linux-gnu
-          cargo build --all --target=x86_64-unknown-linux-gnu --release
-        displayName: Cargo x86_64-unknown-linux-gnu build
-      - script: |
-          rustup target add x86_64-pc-windows-msvc
-          cargo build --target=x86_64-pc-windows-msvc
-          cargo build --target=x86_64-pc-windows-msvc --release
-        displayName: Cargo x86_64-pc-windows-msvc build
+  steps:
+  # build for all other supported platforms only if we're releasing
+  - script: |
+      cargo build --all --target=x86_64-unknown-linux-gnu
+      cargo build --all --target=x86_64-unknown-linux-gnu --release
+    displayName: Cargo x86_64-unknown-linux-gnu build
+  - script: |
+      rustup target add x86_64-pc-windows-msvc
+      cargo build --target=x86_64-pc-windows-msvc
+      cargo build --target=x86_64-pc-windows-msvc --release
+    displayName: Cargo x86_64-pc-windows-msvc build
 
-      - script: |
-          rustup target add aarch64-unknown-linux-gnu
-          cargo build --target=aarch64-unknown-linux-gnu --release
-        displayName: Cargo aarch64-unknown-linux-gnu build
+  - script: |
+      rustup target add aarch64-unknown-linux-gnu
+      cargo build --target=aarch64-unknown-linux-gnu --release
+    displayName: Cargo aarch64-unknown-linux-gnu build
 
-      # - script: |
-      #     rustup target add aarch64-unknown-none
-      #     cargo build --target=aarch64-unknown-none --release --no-default-features
-      #   displayName: Cargo aarch64-unknown-none build
+  # - script: |
+  #     rustup target add aarch64-unknown-none
+  #     cargo build --target=aarch64-unknown-none --release --no-default-features
+  #   displayName: Cargo aarch64-unknown-none build
 
-      # Copy and archive files for distribution
-      - task: CopyFiles@2
-        displayName: Copy builds
-        inputs:
-          sourceFolder: '$(Build.SourcesDirectory)/target/'
-          contents: |
-            x86_64-unknown-linux-gnu/debug/libsuper_awesome_crate.a 
-            x86_64-unknown-linux-gnu/release/libsuper_awesome_crate.a 
-            x86_64-pc-windows-msvc/debug/super_awesome_crate.lib 
-            x86_64-pc-windows-msvc/release/super_awesome_crate.lib
-            aarch64-unknown-linux-gnu/release/libsuper_awesome_crate.a
-            aarch64-unknown-none/release/libsuper_awesome_crate.a
-          targetFolder: '$(Build.BinariesDirectory)'
+  # Copy and archive files for distribution
+  - task: CopyFiles@2
+    displayName: Copy builds
+    inputs:
+      sourceFolder: '$(Build.SourcesDirectory)/target/'
+      contents: |
+        x86_64-unknown-linux-gnu/debug/libsuper_awesome_crate.a 
+        x86_64-unknown-linux-gnu/release/libsuper_awesome_crate.a 
+        x86_64-pc-windows-msvc/debug/super_awesome_crate.lib 
+        x86_64-pc-windows-msvc/release/super_awesome_crate.lib
+        aarch64-unknown-linux-gnu/release/libsuper_awesome_crate.a
+        aarch64-unknown-none/release/libsuper_awesome_crate.a
+      targetFolder: '$(Build.BinariesDirectory)'
 
-      - task: ArchiveFiles@2
-        displayName: x86_64-unknown-linux-gnu build archive
-        inputs:
-          rootFolderOrFile: '$(Build.BinariesDirectory)/x86_64-unknown-linux-gnu'
-          archiveType: 'tar'
-          tarCompression: 'gz'
-          archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-linux-amd64.tar.gz'
+  - task: ArchiveFiles@2
+    displayName: x86_64-unknown-linux-gnu build archive
+    inputs:
+      rootFolderOrFile: '$(Build.BinariesDirectory)/x86_64-unknown-linux-gnu'
+      archiveType: 'tar'
+      tarCompression: 'gz'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-linux-amd64.tar.gz'
 
-      - task: ArchiveFiles@2
-        displayName: x86_64-pc-windows-msvc build archive
-        inputs:
-          rootFolderOrFile: '$(Build.BinariesDirectory)/x86_64-pc-windows-msvc'
-          archiveType: 'zip'
-          archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-windows-amd64.zip'
+  - task: ArchiveFiles@2
+    displayName: x86_64-pc-windows-msvc build archive
+    inputs:
+      rootFolderOrFile: '$(Build.BinariesDirectory)/x86_64-pc-windows-msvc'
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-windows-amd64.zip'
 
-      - task: ArchiveFiles@2
-        displayName: aarch64-unknown-linux-gnu build archive
-        inputs:
-          rootFolderOrFile: '$(Build.BinariesDirectory)/aarch64-unknown-linux-gnu/release'
-          archiveType: 'tar'
-          tarCompression: 'gz'
-          archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-linux-aarch64.tar.gz'
+  - task: ArchiveFiles@2
+    displayName: aarch64-unknown-linux-gnu build archive
+    inputs:
+      rootFolderOrFile: '$(Build.BinariesDirectory)/aarch64-unknown-linux-gnu/release'
+      archiveType: 'tar'
+      tarCompression: 'gz'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-linux-aarch64.tar.gz'
 
-      # - task: ArchiveFiles@2
-      #   displayName: aarch64-unknown-none build archive
-      #   inputs:
-      #     rootFolderOrFile: '$(Build.BinariesDirectory)/aarch64-unknown-none/release'
-      #     archiveType: 'tar'
-      #     tarCompression: 'gz'
-      #     archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-aarch64.tar.gz'
+  # - task: ArchiveFiles@2
+  #   displayName: aarch64-unknown-none build archive
+  #   inputs:
+  #     rootFolderOrFile: '$(Build.BinariesDirectory)/aarch64-unknown-none/release'
+  #     archiveType: 'tar'
+  #     tarCompression: 'gz'
+  #     archiveFile: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-aarch64.tar.gz'
 
-      - task: GitHubRelease@0
-        displayName: 'GitHub release'
-        inputs:
-          gitHubConnection: 'imgeorgiev'
-          repositoryName: '$(Build.Repository.Name)'
-          action: 'edit'
-          target: '$(build.sourceVersion)'
-          tagPattern: 'v*.*.*'
-          tag: '$(Build.SourceBranchName)'
-          assets: '$(Build.ArtifactStagingDirectory)/*'
-          title: '$(Build.SourceBranchName)'
-          assetUploadMode: 'replace'
-          addChangeLog: true
+  - task: GitHubRelease@0
+    displayName: 'GitHub release'
+    inputs:
+      gitHubConnection: 'imgeorgiev'
+      repositoryName: '$(Build.Repository.Name)'
+      action: 'edit'
+      target: '$(build.sourceVersion)'
+      tagPattern: 'v*.*.*'
+      tag: '$(Build.SourceBranchName)'
+      assets: '$(Build.ArtifactStagingDirectory)/*'
+      title: '$(Build.SourceBranchName)'
+      assetUploadMode: 'replace'
+      addChangeLog: true
