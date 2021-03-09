@@ -113,7 +113,7 @@ jobs:
       target: '$(build.sourceVersion)'
       tagPattern: 'v*.*.*'
       tag: '$(Build.SourceBranchName)'
-      assets: '$(Build.ArtifactStagingDirectory)/*'
+      assets: '$(Build.ArtifactStagingDirectory)/$(Build.Repository.Name)*'
       title: '$(Build.SourceBranchName)'
       assetUploadMode: 'replace'
       addChangeLog: true
