@@ -31,7 +31,7 @@ jobs:
 - job: 'Realease'
 
   # run only if the commit was tagged
-  condition: startsWith(variables['build.sourceBranch'], 'refs/tags/')
+  condition: startsWith(variables['build.sourceBranch'], 'refs/tags/v')
 
   # base containter definition
   pool:
@@ -109,7 +109,7 @@ jobs:
     inputs:
       gitHubConnection: 'imgeorgiev'
       repositoryName: '$(Build.Repository.Name)'
-      action: 'edit'
+      action: 'create'
       target: '$(build.sourceVersion)'
       tagPattern: 'v*.*.*'
       tag: '$(Build.SourceBranchName)'
