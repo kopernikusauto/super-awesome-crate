@@ -49,6 +49,7 @@ steps:
       action: 'edit'
       target: '$(build.sourceVersion)'
       tagPattern: 'v*.*.*'
+      tag: '$(Build.SourceBranchName)'
       assets: '$(Build.ArtifactStagingDirectory)/super-awesome-crate-$(Build.SourceBranchName)-$(Agent.OS)-$(Agent.OSArchitecture).tar.gz'
       title: '$(Build.SourceBranchName)'
       assetUploadMode: 'replace'
